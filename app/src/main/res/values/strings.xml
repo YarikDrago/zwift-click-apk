@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zwift Click Emulator — PoC</string>
+    <string name="start_advertising">Start Advertising</string>
+    <string name="stop_advertising">Stop Advertising</string>
+    <string name="gear_ls1">LS1 · Gear Down</string>
+    <string name="gear_ls2">LS2</string>
+    <string name="gear_rs1">RS1 · Gear Up</string>
+    <string name="gear_rs2">RS2</string>
+    <string name="gear_left_aux">Left Aux</string>
+    <string name="gear_test_button">%1$s\n0x%2$04X</string>
+    <string name="click_plus">Click +\n0x37</string>
+    <string name="click_minus">Click −\n0x37</string>
+    <string name="gears_ready">Ready</string>
+    <string name="gears_waiting">Waiting for Zwift</string>
+    <string name="logs">Logs</string>
+    <string name="status">Bluetooth: %1$s\nBLE Peripheral: %2$s\nAdvertising: %3$s\nConnected clients: %4$d\nGear controls: %5$s</string>
+</resources>
