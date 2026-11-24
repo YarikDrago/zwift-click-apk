@@ -139,6 +139,9 @@ internal class ClickPeripheral(
         private val resumeTransmissions = Runnable {
             if (session === this) server?.let { gatt -> guarded { sendNext(gatt) } }
         }
+        private val keepAlive = Runnable {
+            if (session === this) server?.let { gatt -> guarded { sendKeepAlive(gatt) } }
+        }
         private val transmissionTimeout = Runnable {
             if (session === this) {
                 finish("Failed", "${inFlight?.kind?.label} timed out waiting for Android callback")
@@ -149,11 +152,15 @@ internal class ClickPeripheral(
             main.removeCallbacks(startupTimeout)
             main.removeCallbacks(resumeTransmissions)
             main.removeCallbacks(transmissionTimeout)
+            main.removeCallbacks(keepAlive)
         }
 
         fun press(gatt: BluetoothGattServer, label: String, pressed: ByteArray, released: ByteArray) {
             val targets = clients.filterValues { it.gearReady }
             if (targets.isEmpty()) return
+            val lastPressAt = SystemClock.uptimeMillis()
+            scheduleKeepAlive(lastPressAt)
+            outgoing.removeAll { it.kind == Kind.KEEP_ALIVE }
             if (outgoing.size + targets.size * 2 > MAX_QUEUED_FRAMES) {
                 log("$label skipped: Bluetooth send queue is full")
                 return
@@ -165,6 +172,31 @@ internal class ClickPeripheral(
             }
             log("$label queued")
             sendNext(gatt)
+        }
+
+        private fun scheduleKeepAlive(from: Long) {
+            main.removeCallbacks(keepAlive)
+            main.postAtTime(keepAlive, from + KEEP_ALIVE_INTERVAL_MS)
+        }
+
+        private fun sendKeepAlive(gatt: BluetoothGattServer) {
+            val targets = clients.filterValues { it.gearReady }
+            if (targets.isEmpty()) return
+            if (inFlight != null || outgoing.isNotEmpty()) {
+                main.postDelayed(keepAlive, GEAR_PULSE_MS)
+                return
+            }
+
+            val neutral = ClickButtons.frame()
+            for ((device, client) in targets) {
+                outgoing.addLast(Outgoing(device, client, Kind.KEEP_ALIVE, neutral))
+            }
+            scheduleKeepAlive(SystemClock.uptimeMillis())
+            sendNext(gatt)
+        }
+
+        private fun cancelKeepAliveWithoutReadyClients() {
+            if (clients.values.none { it.gearReady }) main.removeCallbacks(keepAlive)
         }
 
         // Serialize platform callbacks with Start, Stop, and Activity teardown.
@@ -221,6 +253,7 @@ internal class ClickPeripheral(
                             main.removeCallbacks(transmissionTimeout)
                         }
                     }
+                    cancelKeepAliveWithoutReadyClients()
                 }
                 log("GATT client $state (status=$status, clients=${clients.size})")
                 changed()
@@ -320,7 +353,7 @@ internal class ClickPeripheral(
                             updateGearReadiness(device, client, wasReady)
                         }
                         Kind.PRESS -> nextTransmissionAt = SystemClock.uptimeMillis() + GEAR_PULSE_MS
-                        Kind.NEUTRAL, Kind.RELEASE -> Unit
+                        Kind.NEUTRAL, Kind.RELEASE, Kind.KEEP_ALIVE -> Unit
                     }
                 } else {
                     transmissionFailed(gatt, completed)
@@ -348,9 +381,13 @@ internal class ClickPeripheral(
             if (client.gearReady == wasReady) return
             if (client.gearReady) {
                 outgoing.addLast(Outgoing(device, client, Kind.NEUTRAL, RideButtons.frame()))
+                if (clients.values.none { it !== client && it.gearReady }) {
+                    scheduleKeepAlive(SystemClock.uptimeMillis())
+                }
                 log("Gear controls ready")
             } else {
                 outgoing.removeAll { it.client === client && it.kind != Kind.RIDE_ON }
+                cancelKeepAliveWithoutReadyClients()
             }
             changed()
         }
@@ -389,11 +426,12 @@ internal class ClickPeripheral(
         private fun transmissionFailed(gatt: BluetoothGattServer, frame: Outgoing) {
             when (frame.kind) {
                 Kind.RIDE_ON -> frame.client.indicationPending = false
-                Kind.PRESS -> Unit // The release can still put the remote button state back at neutral.
+                Kind.PRESS, Kind.KEEP_ALIVE -> Unit
                 Kind.NEUTRAL, Kind.RELEASE -> {
                     frame.client.handshakeComplete = false
                     frame.client.indicationPending = false
                     outgoing.removeAll { it.client === frame.client }
+                    cancelKeepAliveWithoutReadyClients()
                     changed()
                     log("GATT connection closing after a failed neutral gear frame")
                     gatt.cancelConnection(frame.device)
@@ -415,6 +453,7 @@ internal class ClickPeripheral(
     private enum class Kind(val label: String) {
         RIDE_ON("RideOn indication"),
         NEUTRAL("Gear neutral"),
+        KEEP_ALIVE("Gear keep-alive"),
         PRESS("Gear press"),
         RELEASE("Gear release")
     }
@@ -467,6 +506,7 @@ internal class ClickPeripheral(
         const val ATT_REQUEST_NOT_SUPPORTED = 0x06
         const val ATT_VALUE_NOT_ALLOWED = 0x13
         const val GEAR_PULSE_MS = 100L
+        const val KEEP_ALIVE_INTERVAL_MS = 10_000L
         const val TRANSMISSION_TIMEOUT_MS = 5_000L
         const val MAX_QUEUED_FRAMES = 12
     }

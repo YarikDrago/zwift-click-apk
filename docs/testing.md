@@ -18,12 +18,18 @@ If upgrading, tap **Stop Advertising** on the connection screen, close Zwift on 
 
 ## Stage 2 gear test
 
-1. Use APK version 0.2.7. Pair **Zwift Ride 4242** under **Controls** and look for **Gear controls: Ready** on the phone. The connection log should show `RideOn indication completion: status=0` and `Gear neutral completion: status=0`. Tap **Back**, then **Go**. Verify that **Gear controls: Ready** is still visible and both gear buttons are enabled. **+** is green and **−** is red.
+1. Use APK version 0.2.8. Pair **Zwift Ride 4242** under **Controls** and look for **Gear controls: Ready** on the phone. The connection log should show `RideOn indication completion: status=0` and `Gear neutral completion: status=0`. Tap **Back**, then **Go**. Verify that **Gear controls: Ready** is still visible and both gear buttons are enabled. **+** is green and **−** is red.
 2. Start a free ride in Zwift with virtual shifting enabled and the Elite Justo 2 paired as **Resistance**. Choose **Settings → Hardware → Shift Style → Sequential** and note the current gear. [Zwift shift styles](https://support.zwift.com/en_us/shift-style-and-gear-range-rksYezzIC) · [Zwift virtual shifting checks](https://support.zwift.com/en_us/controls-not-working-on-zwift-click-BJKICSXWp)
 3. Start away from the gear limits. Tap **+** once and check that the HUD increases by one gear. Tap **−** once and check that it returns to the original gear.
 4. Try two quick taps of **+** and check the HUD for two gear changes. Use **Back → Connection** to confirm the log contains the shift events and the session is still active. Stop Advertising, restart it, then reconnect in Zwift and verify a new tap works.
 
 Report the gear before and after each tap. If a button has no effect, send the corresponding `Click … queued`, `Gear press` and `Gear release` log lines.
+
+### Idle connection
+
+1. Pair the controller, tap a gear button, then leave the app in the foreground without shifting for longer than the previous disconnect interval. The gear in Zwift should stay steady until the next tap.
+2. Check **Connection** for `Gear keep-alive: data=37 08 01 10 01` and its completion status. The app starts sending it after 10 seconds without a tap and repeats every 10 seconds while a client is ready. A new tap restarts the timer.
+3. Check that a shift works after the wait. If the connection still drops, capture the last keep-alive and the disconnection lines.
 
 ### Custom button layout
 
