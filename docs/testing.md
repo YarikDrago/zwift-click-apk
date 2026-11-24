@@ -2,10 +2,10 @@
 
 ## Install and start
 
-If upgrading, tap **Stop Advertising**, close Zwift on the computer and install the new APK over the existing app. Keep `Zwift SF2` as the phone's Bluetooth name for the comparison.
+If upgrading, tap **Stop Advertising** on the connection screen, close Zwift on the computer and install the new APK over the existing app. Keep `Zwift SF2` as the phone's Bluetooth name for the comparison.
 
 1. Build the debug APK as described in the [README](../README.md), or use the existing `app/build/outputs/apk/debug/app-debug.apk`. On an Android phone, enable USB debugging, connect by USB and accept the debugging prompt. Run `adb devices` and check that the phone is shown as `device`. Install with `adb install -r app/build/outputs/apk/debug/app-debug.apk`. You can also transfer and open the APK with Android's package installer.
-2. Turn the phone's Bluetooth on. Open **Zwift Click Emulator — PoC**, tap **Start Advertising** and grant **Nearby devices** if asked. Leave the app visible. Check for **BLE Peripheral: Supported** and **Advertising: Started**. The log should show GATT service registration with `status=0` followed by Android's advertising success.
+2. Turn the phone's Bluetooth on. Open **Zwift Click Emulator — PoC → Connection**, tap **Start Advertising** and grant **Nearby devices** if asked. Leave the app visible. Check for **BLE Peripheral: Supported** and **Advertising: Started**. The log should show GATT service registration with `status=0` followed by Android's advertising success.
 3. For the same discovery conditions as the first hardware test, use `Zwift SF2` as the phone's Bluetooth name. If you need to change it, stop the advert, set that name in Android Settings, then return and start again. Confirm the app logs `scan response name=Zwift SF2`. Restore your original Bluetooth name after the test if you changed it.
 
 ## Check in Zwift
@@ -14,20 +14,27 @@ If upgrading, tap **Stop Advertising**, close Zwift on the computer and install 
 2. Pair the Elite Justo 2 in Zwift as **Power Source** and **Resistance** over Bluetooth, which is the setup Elite describes for full Click compatibility. [Elite trainer configuration on Zwift](https://elitesrl.zendesk.com/hc/en-us/articles/360014674293-Trainer-configuration-on-Zwift)
 3. Open **Controls**. With the Android app still visible and advertising, allow about 30 seconds for discovery. Record the exact entry name if one appears, or capture the Controls list if it stays empty.
 4. Select the entry if offered. Record what Zwift shows and what the phone logs, including any connection, descriptor write, incoming hex payload, indication result, and disconnect. Discovery means the device appeared in the Controls list. Connection means Android reported a successful GATT connection. Recognition after the handshake is a separate observation.
-5. Tap **Stop Advertising** on the phone. If testing another host, close Zwift's active connection first, then start a fresh Android advertising session.
+5. When finished, tap **Stop Advertising** on the phone. If testing another host, close Zwift's active connection first, then start a fresh Android advertising session.
 
 ## Stage 2 gear test
 
-1. Use APK version 0.2.3. Pair **Zwift Ride 4242** under **Controls** and look for **Gear controls: Ready** on the phone. The log should show `RideOn indication completion: status=0` and `Gear neutral completion: status=0`.
+1. Use APK version 0.2.7. Pair **Zwift Ride 4242** under **Controls** and look for **Gear controls: Ready** on the phone. The connection log should show `RideOn indication completion: status=0` and `Gear neutral completion: status=0`. Tap **Back**, then **Go**. Verify that **Gear controls: Ready** is still visible and both gear buttons are enabled. **+** is green and **−** is red.
 2. Start a free ride in Zwift with virtual shifting enabled and the Elite Justo 2 paired as **Resistance**. Choose **Settings → Hardware → Shift Style → Sequential** and note the current gear. [Zwift shift styles](https://support.zwift.com/en_us/shift-style-and-gear-range-rksYezzIC) · [Zwift virtual shifting checks](https://support.zwift.com/en_us/controls-not-working-on-zwift-click-BJKICSXWp)
-3. Start away from the gear limits. Tap **Click +** once and check that the HUD increases by one gear. Tap **Click −** once and check that it returns to the original gear.
-4. Try two quick taps of **Click +** and check the HUD for two gear changes. Stop Advertising, restart it, then reconnect in Zwift and verify a new tap works.
+3. Start away from the gear limits. Tap **+** once and check that the HUD increases by one gear. Tap **−** once and check that it returns to the original gear.
+4. Try two quick taps of **+** and check the HUD for two gear changes. Use **Back → Connection** to confirm the log contains the shift events and the session is still active. Stop Advertising, restart it, then reconnect in Zwift and verify a new tap works.
 
 Report the gear before and after each tap. If a button has no effect, send the corresponding `Click … queued`, `Gear press` and `Gear release` log lines.
 
+### Custom button layout
+
+1. Open **Adjust** from Home. Tap **+** and reduce its width and height, confirm with **OK**, then drag it to one side. Repeat for **−**. Tap **Back → Go** and check that both buttons have the same sizes and positions as on **Adjust**.
+2. Rotate the phone, return to **Adjust**, and make a different layout. Switch between orientations on **Go** and check that each layout returns. While a Zwift session is active, check that **Gear controls: Ready** remains visible after rotation and try both buttons.
+3. Close and reopen the app and check that both orientations retain their layouts. Tap **Layout → Reset** in one orientation and verify that only that layout returns to its default.
+4. Set the width and height of both buttons to 100% using **Layout → Resize +** and **Layout → Resize −**. In **Adjust**, tapping their shared area should open **Resize +**. In **Go** with Zwift connected, tapping that area should shift up. Reduce the height of **+** and check that tapping the exposed part of **−** shifts down.
+
 ### Tutorial plus prompt
 
-When the tutorial asks for `+`, tap **Click +** once. The log should show `Click PLUS (0x37) queued`, followed by press `37 08 00 10 01` and release `37 08 01 10 01`. If Zwift asks for `−` next, tap **Click −**. Record whether the tutorial advances after each tap.
+When the tutorial asks for `+`, open **Go** and tap **+** once. The connection log should show `Click PLUS (0x37) queued`, followed by press `37 08 00 10 01` and release `37 08 01 10 01`. If Zwift asks for `−` next, tap **−**. Record whether the tutorial advances after each tap.
 
 ## Check the radio with a generic scanner
 

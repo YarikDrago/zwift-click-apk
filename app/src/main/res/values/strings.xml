@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Zwift Click Emulator — PoC</string>
+    <string name="home_title">Zwift Click Emulator</string>
+    <string name="go">Go</string>
+    <string name="connection">Connection</string>
+    <string name="adjust">Adjust</string>
+    <string name="adjust_help">Drag to move · Tap to resize</string>
+    <string name="adjust_layout_menu">Layout</string>
+    <string name="adjust_reset">Reset</string>
+    <string name="adjust_resize">Resize %1$s</string>
+    <string name="adjust_width">Width</string>
+    <string name="adjust_height">Height</string>
+    <string name="adjust_size_value">%1$s %2$d%%</string>
+    <string name="back">Back</string>
+    <string name="gears">Gear Controls</string>
     <string name="start_advertising">Start Advertising</string>
     <string name="stop_advertising">Stop Advertising</string>
     <string name="gear_ls1">LS1 · Gear Down</string>
@@ -8,11 +21,15 @@
     <string name="gear_rs1">RS1 · Gear Up</string>
     <string name="gear_rs2">RS2</string>
     <string name="gear_left_aux">Left Aux</string>
-    <string name="gear_test_button">%1$s\n0x%2$04X</string>
-    <string name="click_plus">Click +\n0x37</string>
-    <string name="click_minus">Click −\n0x37</string>
+    <string name="gear_test_button">%1$s (0x%2$04X)</string>
+    <string name="ride_tests">Ride tests</string>
+    <string name="click_plus">+</string>
+    <string name="click_minus">−</string>
+    <string name="gear_up_accessibility">Gear up</string>
+    <string name="gear_down_accessibility">Gear down</string>
     <string name="gears_ready">Ready</string>
     <string name="gears_waiting">Waiting for Zwift</string>
+    <string name="gear_status">Gear controls: %1$s</string>
     <string name="logs">Logs</string>
     <string name="status">Bluetooth: %1$s\nBLE Peripheral: %2$s\nAdvertising: %3$s\nConnected clients: %4$d\nGear controls: %5$s</string>
 </resources>

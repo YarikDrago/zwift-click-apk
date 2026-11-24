@@ -11,8 +11,8 @@ android {
         applicationId = "app.zwiftclick.emulator"
         minSdk = 23
         targetSdk = 34
-        versionCode = 6
-        versionName = "0.2.3"
+        versionCode = 10
+        versionName = "0.2.7"
     }
 
     compileOptions {
